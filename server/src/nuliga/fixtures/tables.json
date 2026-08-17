@@ -1,0 +1,95 @@
+{
+  "3555414": {
+    "groupTable": [
+      {
+        "group": "Herren 30 2.Bezirksliga Gr. 049",
+        "groupTableTeam": [
+          { "teamId": 9001414, "team": "TC Rauenberg", "tableRank": 1, "meetings": 5, "ownPoints": 10, "otherPoints": 0, "ownMatches": 22, "otherMatches": 8 },
+          { "teamId": 3555414, "team": "TC Rot 1971", "tableRank": 2, "meetings": 5, "ownPoints": 7, "otherPoints": 3, "ownMatches": 18, "otherMatches": 12 },
+          { "teamId": 9002414, "team": "TC Wiesloch", "tableRank": 3, "meetings": 5, "ownPoints": 6, "otherPoints": 4, "ownMatches": 16, "otherMatches": 14 },
+          { "teamId": 9003414, "team": "TSV Malsch", "tableRank": 4, "meetings": 5, "ownPoints": 3, "otherPoints": 7, "ownMatches": 12, "otherMatches": 18 },
+          { "teamId": 9004414, "team": "TC Sandhausen", "tableRank": 5, "meetings": 5, "ownPoints": 0, "otherPoints": 10, "ownMatches": 8, "otherMatches": 22 }
+        ]
+      }
+    ]
+  },
+  "3554933": {
+    "groupTable": [
+      {
+        "group": "Herren 60 (4er) 1.Bezirksklasse Gr. 086",
+        "groupTableTeam": [
+          { "teamId": 3554933, "team": "TC Rot 1971", "tableRank": 1, "meetings": 4, "ownPoints": 8, "otherPoints": 0, "ownMatches": 14, "otherMatches": 4 },
+          { "teamId": 9002933, "team": "TC Hockenheim", "tableRank": 2, "meetings": 4, "ownPoints": 5, "otherPoints": 3, "ownMatches": 10, "otherMatches": 8 },
+          { "teamId": 9003933, "team": "TC Walldorf", "tableRank": 3, "meetings": 4, "ownPoints": 2, "otherPoints": 6, "ownMatches": 6, "otherMatches": 12 },
+          { "teamId": 9004933, "team": "TSV Nußloch", "tableRank": 4, "meetings": 4, "ownPoints": 1, "otherPoints": 7, "ownMatches": 4, "otherMatches": 14 }
+        ]
+      }
+    ]
+  },
+  "3555044": {
+    "groupTable": [
+      {
+        "group": "Herren 70 (4er) 2.Bezirksliga Gr. 167",
+        "groupTableTeam": [
+          { "teamId": 9001044, "team": "TC Leimen", "tableRank": 1, "meetings": 4, "ownPoints": 7, "otherPoints": 1, "ownMatches": 13, "otherMatches": 5 },
+          { "teamId": 3555044, "team": "TC Rot 1971", "tableRank": 2, "meetings": 4, "ownPoints": 6, "otherPoints": 2, "ownMatches": 12, "otherMatches": 6 },
+          { "teamId": 9002044, "team": "TC Nußloch", "tableRank": 3, "meetings": 4, "ownPoints": 3, "otherPoints": 5, "ownMatches": 8, "otherMatches": 10 },
+          { "teamId": 9003044, "team": "TSG St. Leon", "tableRank": 4, "meetings": 4, "ownPoints": 0, "otherPoints": 8, "ownMatches": 3, "otherMatches": 15 }
+        ]
+      }
+    ]
+  },
+  "3554774": {
+    "groupTable": [
+      {
+        "group": "Herren (4er) 1.Kreisklasse Gr. 021",
+        "groupTableTeam": [
+          { "teamId": 9001774, "team": "TC Reilingen", "tableRank": 1, "meetings": 6, "ownPoints": 11, "otherPoints": 1, "ownMatches": 20, "otherMatches": 4 },
+          { "teamId": 9002774, "team": "TC Oftersheim", "tableRank": 2, "meetings": 6, "ownPoints": 9, "otherPoints": 3, "ownMatches": 17, "otherMatches": 7 },
+          { "teamId": 3554774, "team": "TC Rot 1971", "tableRank": 3, "meetings": 6, "ownPoints": 6, "otherPoints": 6, "ownMatches": 12, "otherMatches": 12 },
+          { "teamId": 9003774, "team": "TC Neulußheim", "tableRank": 4, "meetings": 6, "ownPoints": 4, "otherPoints": 8, "ownMatches": 9, "otherMatches": 15 },
+          { "teamId": 9004774, "team": "TSV Rot", "tableRank": 5, "meetings": 6, "ownPoints": 2, "otherPoints": 10, "ownMatches": 6, "otherMatches": 18 },
+          { "teamId": 9005774, "team": "TC Waghäusel", "tableRank": 6, "meetings": 6, "ownPoints": 0, "otherPoints": 12, "ownMatches": 3, "otherMatches": 21 }
+        ]
+      }
+    ]
+  },
+  "3555049": {
+    "groupTable": [
+      {
+        "group": "Herren 40 1.Bezirksklasse Gr. 064",
+        "groupTableTeam": [
+          { "teamId": 3555049, "team": "TC Rot 1971", "tableRank": 1, "meetings": 5, "ownPoints": 9, "otherPoints": 1, "ownMatches": 17, "otherMatches": 5 },
+          { "teamId": 9002049, "team": "TC Schwetzingen", "tableRank": 2, "meetings": 5, "ownPoints": 6, "otherPoints": 4, "ownMatches": 13, "otherMatches": 9 },
+          { "teamId": 9003049, "team": "TC Eppelheim", "tableRank": 3, "meetings": 5, "ownPoints": 3, "otherPoints": 7, "ownMatches": 9, "otherMatches": 13 },
+          { "teamId": 9004049, "team": "TSV Plankstadt", "tableRank": 4, "meetings": 5, "ownPoints": 2, "otherPoints": 8, "ownMatches": 7, "otherMatches": 15 }
+        ]
+      }
+    ]
+  },
+  "3555308": {
+    "groupTable": [
+      {
+        "group": "U15m 1.Bezirksklasse Gr. 132",
+        "groupTableTeam": [
+          { "teamId": 9001308, "team": "TC Wiesloch", "tableRank": 1, "meetings": 4, "ownPoints": 8, "otherPoints": 0, "ownMatches": 16, "otherMatches": 0 },
+          { "teamId": 3555308, "team": "TC Rot 1971", "tableRank": 2, "meetings": 4, "ownPoints": 4, "otherPoints": 4, "ownMatches": 8, "otherMatches": 8 },
+          { "teamId": 9002308, "team": "TC St. Leon", "tableRank": 3, "meetings": 4, "ownPoints": 0, "otherPoints": 8, "ownMatches": 0, "otherMatches": 16 }
+        ]
+      }
+    ]
+  },
+  "3555724": {
+    "groupTable": [
+      {
+        "group": "U18 gemischt 1.Bezirksliga Gr. 159",
+        "groupTableTeam": [
+          { "teamId": 9001724, "team": "TC Sandhausen", "tableRank": 1, "meetings": 4, "ownPoints": 6, "otherPoints": 2, "ownMatches": 10, "otherMatches": 6 },
+          { "teamId": 9002724, "team": "TC Walldorf", "tableRank": 2, "meetings": 4, "ownPoints": 5, "otherPoints": 3, "ownMatches": 9, "otherMatches": 7 },
+          { "teamId": 3555724, "team": "TC Rot 1971", "tableRank": 3, "meetings": 4, "ownPoints": 3, "otherPoints": 5, "ownMatches": 7, "otherMatches": 9 },
+          { "teamId": 9003724, "team": "TSG Rauenberg", "tableRank": 4, "meetings": 4, "ownPoints": 2, "otherPoints": 6, "ownMatches": 6, "otherMatches": 10 }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "teamSeason": [
+    {
+      "season": { "name": "2026" },
+      "teamChampionship": [
+        {
+          "championship": { "name": "Sommer 2026" },
+          "team": [
+            { "teamId": 3555414, "name": "Herren 30", "group": "2.Bezirksliga Gr. 049", "contestTypeNickname": "H30" },
+            { "teamId": 3554933, "name": "Herren 60 (4er) Freitag", "group": "1.Bezirksklasse Gr. 086", "contestTypeNickname": "H60" },
+            { "teamId": 3555044, "name": "Herren 70 (4er)", "group": "2.Bezirksliga Gr. 167", "contestTypeNickname": "H70" },
+            { "teamId": 3554774, "name": "Herren (4er)", "group": "1.Kreisklasse Gr. 021", "contestTypeNickname": "H" },
+            { "teamId": 3555049, "name": "Herren 40", "group": "1.Bezirksklasse Gr. 064", "contestTypeNickname": "H40" },
+            { "teamId": 3555308, "name": "Junioren U15 (4er)", "group": "1.Bezirksklasse Gr. 132", "contestTypeNickname": "U15m" },
+            { "teamId": 3555724, "name": "Gemischte Mannschaft U18 (4er)", "group": "1.Bezirksliga Gr. 159", "contestTypeNickname": "U18m" }
+          ]
+        }
+      ]
+    }
+  ]
+}

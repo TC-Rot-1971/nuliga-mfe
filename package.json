@@ -1,0 +1,14 @@
+{
+  "name": "nuliga-mfe",
+  "private": true,
+  "workspaces": [
+    "server",
+    "widget"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:widget": "npm run dev -w widget",
+    "build": "npm run build -w server && npm run build -w widget",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w widget"
+  }
+}
