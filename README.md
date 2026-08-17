@@ -15,8 +15,8 @@ competition data, presumably for GDPR reasons).
 
 **Access has to be requested from Badischer Tennisverband (BAD)** for club 33232
 (Tennisclub Rot 1971 e.V.). See [Requesting API access](#requesting-api-access) below.
-Until that's granted, the backend runs in **mock mode**, serving realistic fixture data
-modeled on TC Rot 1971's actual public team list (Sommer 2026: Herren 30/40/60/70,
+Until that's granted, the pipeline runs in **mock mode**, publishing realistic fixture
+data modeled on TC Rot 1971's actual public team list (Sommer 2026: Herren 30/40/60/70,
 Herren, Junioren U15, U18 gemischt).
 
 The nuPortalRS request/response shapes used here (`server/src/nuliga/types.ts`) were
@@ -25,14 +25,35 @@ reverse-engineered from a working reference client
 official nu-gmbh documentation — treat field names as best-effort until verified
 against a real token.
 
+## Architecture: no server in production
+
+There is no deployed backend. A GitHub Actions job — **daily, plus on every push to
+`main`** — does the entire "backend" job in one shot:
+
+1. fetch the club overview from nuPortalRS (or mock fixtures, see below)
+2. write it as a static `team-overview.json`
+3. build the widget against that file
+4. publish both to GitHub Pages
+
+The nuPortalRS client secret lives only as a GitHub Actions secret, used for the few
+seconds the job runs — it's never shipped to the browser or embedded in anything
+published. Real ClubDesk embeds fetch `team-overview.json` straight from GitHub Pages,
+refreshed once a day.
+
+`server/` is a Node/TS package that holds the nuliga-fetching logic
+(`src/nuliga/*`) and the CLI script that runs in CI (`scripts/generate-overview.ts`).
+It also has an optional Hono HTTP server (`src/index.ts`) purely for local
+development/debugging — it is **not** deployed anywhere.
+
 ## Project layout
 
 ```
-server/   Hono backend: nuPortalRS client (mock + live), aggregates
-          teams+table+schedule into one JSON payload, serves /api/team-overview
+server/   nuPortalRS client (mock + live) + aggregation logic, used by:
+            scripts/generate-overview.ts  the CLI job CI runs daily (the real "backend")
+            src/index.ts                  optional local-dev-only HTTP server
 widget/   Vanilla web component (<nuliga-team-widget>), built with Vite into:
             dist-embed/nuliga-team-widget.js  the actual ClubDesk embed script
-            dist/                             a static preview page (backend-free, deployable to GitHub Pages)
+            dist/                             the GitHub Pages demo page, backend-free
 ```
 
 ## Development
@@ -41,37 +62,41 @@ This machine doesn't have Node installed globally — use the pinned `shell.nix`
 
 ```sh
 nix-shell --run "npm install"
-nix-shell --run "npm run build"        # builds server + widget
+nix-shell --run "npm run build"        # fetches mock data, builds server + widget
 nix-shell --run "npm run typecheck"
 
-# run the backend (serves API + the built widget on one origin, mock mode by default)
-cd server && nix-shell --run "npm run dev"   # http://localhost:8787
+# fetch/refresh the static data snapshot (mock by default, see below for live)
+nix-shell --run "npm run generate-overview"
 
-# widget dev server with hot reload (proxies /api to :8787)
+# widget dev server with hot reload, reading widget/public/team-overview.json
 cd widget && nix-shell --run "npm run dev"
+
+# optional: local-dev HTTP server exposing /api/team-overview for interactive
+# testing against the live/mock client directly; not used in production
+cd server && nix-shell --run "npm run dev"   # http://localhost:8787
 ```
 
-`GET /api/team-overview` returns the aggregated club/team JSON. `GET /embed/nuliga-team-widget.js`
-serves the embeddable custom element script (CORS-enabled, since it's loaded cross-origin
-from ClubDesk). `GET /` serves the static preview page — useful for sanity-checking
-changes without touching ClubDesk, but it's not what gets embedded there.
+`npm run generate-overview` writes `widget/public/team-overview.json`, which the
+widget's demo page (`widget/index.html`) reads directly — so `widget/dist` after a
+build is fully self-contained, no backend needed to preview it. This is exactly what
+CI publishes to GitHub Pages.
 
-`npm run generate-mock` (or plain `npm run build`, which calls it first) snapshots the
-mock club overview into `widget/public/team-overview.json`, which the preview page reads
-directly — so the preview works with **no backend running at all**. This is also what
-makes the widget deployable to GitHub Pages (see below): only the demo data is static,
-real ClubDesk embeds still fetch live from a deployed backend via `api-base`.
+## Enabling live nuliga data
 
-## Switching to live nuliga data
+Once Badischer Tennisverband issues credentials, set them as **repository secrets**
+(Settings → Secrets and variables → Actions) — this is what the daily job uses:
 
-Copy `server/.env.example` to `server/.env` and fill in what BAD provides:
+- `NULIGA_HOST` — exact host given by BAD, pattern seen elsewhere:
+  `https://<verband>-portal.liga.nu`
+- `NULIGA_CLIENT_ID`
+- `NULIGA_CLIENT_SECRET`
 
-```
-NULIGA_MODE=live
-NULIGA_HOST=https://<verband>-portal.liga.nu   # exact host given by BAD
-NULIGA_CLIENT_ID=...
-NULIGA_CLIENT_SECRET=...
-```
+The workflow (`.github/workflows/deploy-pages.yml`) checks whether `NULIGA_CLIENT_ID`
+is set and automatically switches from mock to live mode — no other change needed once
+the secrets exist.
+
+For local testing, copy `server/.env.example` to `server/.env` with the same values
+and `NULIGA_MODE=live`, then run `npm run generate-overview`.
 
 `server/src/nuliga/nuligaClient.ts` (`LiveNuligaClient`) has never been run against a
 real token — validate the response shapes the moment credentials exist and adjust
@@ -89,25 +114,22 @@ Send this to Badischer Tennisverband (contact via badischer-tennisverband.de):
 > "club") für den Tennisclub Rot 1971 e.V., Vereinsnummer 33232. Bitte teilen
 > Sie uns den zuständigen nuPortalRS-Host sowie Client-ID/Client-Secret mit.
 
-Once you have credentials, set the env vars above and flip `NULIGA_MODE` to `live` —
-no other code changes should be needed if BAD's response shapes match the reference
-implementation.
-
 ## Embedding in ClubDesk
 
-Deploy this project somewhere reachable over HTTPS (small VM, or a serverless host —
-the backend is a plain Hono app). Then, on the ClubDesk page that should show the
-teams:
+On the ClubDesk page that should show the teams:
 
 1. **Edit → Seiten-Optionen → HEAD-Start**, add:
    ```html
-   <script type="module" src="https://YOUR-DEPLOYMENT/embed/nuliga-team-widget.js"></script>
+   <script type="module" src="https://TC-Rot-1971.github.io/nuliga-mfe/nuliga-team-widget.js"></script>
    ```
 2. In the page body, add an **"Externe Inhalte"** block (or wherever ClubDesk lets you
    drop raw HTML) containing:
    ```html
-   <nuliga-team-widget api-base="https://YOUR-DEPLOYMENT/api/team-overview"></nuliga-team-widget>
+   <nuliga-team-widget api-base="https://TC-Rot-1971.github.io/nuliga-mfe/team-overview.json"></nuliga-team-widget>
    ```
+
+That's it — both URLs are published by CI and refresh daily on their own; there's
+nothing else to deploy or keep running.
 
 This is the same pattern other clubs use to embed nuliga tables via community widgets
 (e.g. `nutab`) on ClubDesk sites — a per-page script plus a custom element/div, not an
@@ -121,28 +143,20 @@ and card borders (`.nuliga-widget`, `.nuliga-card`, `.nuliga-grid`, etc. in
 `widget/src/nuliga-team-widget.ts`). If you want to restyle the cards further, target
 those class names from ClubDesk's own CSS editor — no changes needed on this side.
 
-Both the script and the API are served with permissive CORS since they're loaded
-cross-origin from ClubDesk's domain — tighten `cors()` in `server/src/index.ts` to an
-allowlist of your actual ClubDesk domain(s) before going live if you want to lock that
-down.
+The embed script is served with permissive CORS (it's loaded cross-origin from
+ClubDesk's domain, and module scripts are always CORS-fetched) — GitHub Pages sets
+`Access-Control-Allow-Origin: *` for everything it serves, so this needs no
+configuration.
 
-## GitHub Pages
+## GitHub Pages / CI
 
-GitHub Pages only serves static files, so **only the widget can live there — the
-backend can't** (it needs to hold the nuPortalRS client secret server-side and do
-OAuth token exchange, neither of which works from a static host). What Pages gets is:
+`.github/workflows/deploy-pages.yml` runs on push to `main`, daily at ~05:00 UTC, and
+manually via "Run workflow". Each run: picks live vs mock mode, fetches the overview,
+builds the widget, and deploys to Pages via `actions/deploy-pages` — no `gh-pages`
+branch, no long-lived secrets outside the job. One-time repo setup: **Settings → Pages
+→ Source: GitHub Actions** (already done for this repo).
 
-- the real embeddable script, `nuliga-team-widget.js`
-- a demo page (`index.html`) that runs against a static snapshot of mock data
-  (`team-overview.json`), so the whole demo works with zero backend
-
-`.github/workflows/deploy-pages.yml` builds and publishes both on every push to `main`
-(or manually via "Run workflow"), using GitHub's `actions/deploy-pages` — no secrets or
-`gh-pages` branch needed. One-time setup: in the repo's **Settings → Pages**, set
-"Build and deployment" → **Source: GitHub Actions**.
-
-Once deployed, the demo is at `https://TC-Rot-1971.github.io/nuliga-mfe/` and the embed
-script at `https://TC-Rot-1971.github.io/nuliga-mfe/nuliga-team-widget.js` — usable
-as-is for testing the ClubDesk embed against mock data (point `api-base` at
-`https://TC-Rot-1971.github.io/nuliga-mfe/team-overview.json`), or swap in a real
-backend URL once one is deployed and BAD access exists.
+Published URLs:
+- Demo page: `https://TC-Rot-1971.github.io/nuliga-mfe/`
+- Embed script: `https://TC-Rot-1971.github.io/nuliga-mfe/nuliga-team-widget.js`
+- Data: `https://TC-Rot-1971.github.io/nuliga-mfe/team-overview.json`

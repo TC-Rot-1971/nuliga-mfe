@@ -1,13 +1,19 @@
-name: Deploy widget to GitHub Pages
+name: Fetch nuliga data and deploy to GitHub Pages
 
-# Publishes the embeddable widget script + a static mock-data demo page.
-# Only the widget is static-hostable — the backend (OAuth secret, live
-# nuPortalRS proxying) still needs real server hosting and is not part of
-# this deployment.
+# This IS the "backend": no server runs in production. Daily (and on every
+# push to main), this job fetches the club overview — live from nuPortalRS
+# if NULIGA_CLIENT_ID/SECRET repo secrets are set, mock fixtures otherwise —
+# bakes it into a static JSON file, builds the widget against it, and
+# publishes both to GitHub Pages. The nuPortalRS client secret only ever
+# exists inside this job; it's never shipped to the browser.
 
 on:
   push:
     branches: [main]
+  schedule:
+    # ~05:00 UTC daily. GitHub may delay scheduled runs by a few/several
+    # minutes under load; that's fine for a once-a-day standings refresh.
+    - cron: "0 5 * * *"
   workflow_dispatch:
 
 permissions:
@@ -29,12 +35,35 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Build static demo + embed script
-        run: npm run build:pages
+
+      - name: Pick live vs mock mode
+        id: mode
+        run: |
+          if [ -n "${{ secrets.NULIGA_CLIENT_ID }}" ]; then
+            echo "mode=live" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=mock" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch club overview
+        run: npm run generate-overview -w server
+        env:
+          NULIGA_MODE: ${{ steps.mode.outputs.mode }}
+          NULIGA_FEDERATION: BAD
+          NULIGA_CLUB_NR: "33232"
+          NULIGA_CLUB_NAME: TC Rot 1971
+          NULIGA_HOST: ${{ secrets.NULIGA_HOST }}
+          NULIGA_CLIENT_ID: ${{ secrets.NULIGA_CLIENT_ID }}
+          NULIGA_CLIENT_SECRET: ${{ secrets.NULIGA_CLIENT_SECRET }}
+
+      - name: Build widget against fetched data
+        run: npm run build -w widget
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+
       - name: Expose the embed script alongside the demo page
         run: cp widget/dist-embed/nuliga-team-widget.js widget/dist/nuliga-team-widget.js
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -7,7 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "generate-mock": "tsx scripts/generate-mock-overview.ts"
+    "generate-overview": "tsx scripts/generate-overview.ts"
   },
   "dependencies": {
     "hono": "^4.6.14",
