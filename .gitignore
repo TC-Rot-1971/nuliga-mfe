@@ -1,4 +1,6 @@
 node_modules/
 dist/
+dist-embed/
+widget/public/team-overview.json
 .env
 *.log

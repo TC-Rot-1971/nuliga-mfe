@@ -8,7 +8,9 @@
   "scripts": {
     "dev:server": "npm run dev -w server",
     "dev:widget": "npm run dev -w widget",
-    "build": "npm run build -w server && npm run build -w widget",
+    "generate-mock": "npm run generate-mock -w server",
+    "build": "npm run generate-mock && npm run build -w server && npm run build -w widget",
+    "build:pages": "npm run generate-mock && npm run build -w widget",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w widget"
   }
 }

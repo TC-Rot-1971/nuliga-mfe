@@ -32,7 +32,7 @@ server/   Hono backend: nuPortalRS client (mock + live), aggregates
           teams+table+schedule into one JSON payload, serves /api/team-overview
 widget/   Vanilla web component (<nuliga-team-widget>), built with Vite into:
             dist-embed/nuliga-team-widget.js  the actual ClubDesk embed script
-            dist/                             a local-only preview page (not for ClubDesk)
+            dist/                             a static preview page (backend-free, deployable to GitHub Pages)
 ```
 
 ## Development
@@ -53,8 +53,14 @@ cd widget && nix-shell --run "npm run dev"
 
 `GET /api/team-overview` returns the aggregated club/team JSON. `GET /embed/nuliga-team-widget.js`
 serves the embeddable custom element script (CORS-enabled, since it's loaded cross-origin
-from ClubDesk). `GET /` serves a local-only preview page — useful for sanity-checking
+from ClubDesk). `GET /` serves the static preview page — useful for sanity-checking
 changes without touching ClubDesk, but it's not what gets embedded there.
+
+`npm run generate-mock` (or plain `npm run build`, which calls it first) snapshots the
+mock club overview into `widget/public/team-overview.json`, which the preview page reads
+directly — so the preview works with **no backend running at all**. This is also what
+makes the widget deployable to GitHub Pages (see below): only the demo data is static,
+real ClubDesk embeds still fetch live from a deployed backend via `api-base`.
 
 ## Switching to live nuliga data
 
@@ -119,3 +125,24 @@ Both the script and the API are served with permissive CORS since they're loaded
 cross-origin from ClubDesk's domain — tighten `cors()` in `server/src/index.ts` to an
 allowlist of your actual ClubDesk domain(s) before going live if you want to lock that
 down.
+
+## GitHub Pages
+
+GitHub Pages only serves static files, so **only the widget can live there — the
+backend can't** (it needs to hold the nuPortalRS client secret server-side and do
+OAuth token exchange, neither of which works from a static host). What Pages gets is:
+
+- the real embeddable script, `nuliga-team-widget.js`
+- a demo page (`index.html`) that runs against a static snapshot of mock data
+  (`team-overview.json`), so the whole demo works with zero backend
+
+`.github/workflows/deploy-pages.yml` builds and publishes both on every push to `main`
+(or manually via "Run workflow"), using GitHub's `actions/deploy-pages` — no secrets or
+`gh-pages` branch needed. One-time setup: in the repo's **Settings → Pages**, set
+"Build and deployment" → **Source: GitHub Actions**.
+
+Once deployed, the demo is at `https://TC-Rot-1971.github.io/nuliga-mfe/` and the embed
+script at `https://TC-Rot-1971.github.io/nuliga-mfe/nuliga-team-widget.js` — usable
+as-is for testing the ClubDesk embed against mock data (point `api-base` at
+`https://TC-Rot-1971.github.io/nuliga-mfe/team-overview.json`), or swap in a real
+backend URL once one is deployed and BAD access exists.
