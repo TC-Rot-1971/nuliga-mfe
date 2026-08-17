@@ -1,0 +1,44 @@
+name: CI
+
+# Required status checks for PRs into main (see branch protection). Does not
+# deploy anything — that's .github/workflows/deploy-pages.yml, which only
+# triggers on push to main (i.e. after a PR is squash-merged).
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  verify:
+    name: typecheck-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  pr-title:
+    name: conventional-title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title follows Conventional Commits with issue-number scope
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716
+          # Scope is required and must be the issue number this PR closes,
+          # e.g. "feat(#2): add widget".
+          pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)\(#[0-9]+\)!?: .+$'
+          if ! echo "$TITLE" | grep -Eq "$pattern"; then
+            echo "PR title must be Conventional-Commits style with the issue number as scope."
+            echo "Example: feat(#2): add widget"
+            echo "Got: $TITLE"
+            exit 1
+          fi
+          echo "OK: $TITLE"
