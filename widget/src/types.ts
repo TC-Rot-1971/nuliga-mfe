@@ -2,9 +2,12 @@ export interface Meeting {
   scheduled: string;
   teamHome: string;
   teamGuest: string;
+  teamHomeId: number;
+  teamGuestId: number;
   matchesHome: number | null;
   matchesGuest: number | null;
   courtHallNumbers: string;
+  isCompleted: boolean;
 }
 
 export interface TeamOverview {
@@ -21,6 +24,8 @@ export interface TeamOverview {
   } | null;
   lastResult: Meeting | null;
   nextMatch: Meeting | null;
+  /** Full current-year match list (played + upcoming), chronological. */
+  results: Meeting[];
 }
 
 export interface ClubOverview {

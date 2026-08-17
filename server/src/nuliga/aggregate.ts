@@ -26,14 +26,12 @@ export async function buildClubOverview(
   );
 
   const now = new Date();
-  const fromDate = new Date(now);
-  fromDate.setDate(fromDate.getDate() - 30);
-  const toDate = new Date(now);
-  toDate.setDate(toDate.getDate() + 30);
-  const meetingsResponse = await client.getMeetings(
-    fromDate.toISOString().slice(0, 10),
-    toDate.toISOString().slice(0, 10),
-  );
+  // Full current calendar year, not just a window around today: this is what
+  // lets each team's card show its complete season (played + upcoming), not
+  // only the single next/last match.
+  const fromDate = `${now.getFullYear()}-01-01`;
+  const toDate = `${now.getFullYear()}-12-31`;
+  const meetingsResponse = await client.getMeetings(fromDate, toDate);
   const meetings = meetingsResponse.meetings.meetingAbbr;
 
   const teams: TeamOverview[] = await Promise.all(
@@ -71,6 +69,7 @@ export async function buildClubOverview(
           : null,
         lastResult,
         nextMatch,
+        results: teamMeetings,
       };
     }),
   );

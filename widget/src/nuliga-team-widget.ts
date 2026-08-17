@@ -27,6 +27,12 @@ const STYLES = `
   .nuliga-widget .nuliga-rank { font-weight: 600; }
   .nuliga-widget .nuliga-status { padding: 2em; text-align: center; opacity: 0.75; }
   .nuliga-widget .nuliga-status.nuliga-error { opacity: 1; color: #b3261e; }
+  .nuliga-widget .nuliga-results { margin-top: 0.5em; font-size: 0.9em; }
+  .nuliga-widget .nuliga-results summary { cursor: pointer; }
+  .nuliga-widget .nuliga-results table { width: 100%; border-collapse: collapse; margin-top: 0.5em; }
+  .nuliga-widget .nuliga-results td { padding: 0.2em 0.3em 0.2em 0; vertical-align: top; }
+  .nuliga-widget .nuliga-results td.nuliga-date { white-space: nowrap; opacity: 0.75; }
+  .nuliga-widget .nuliga-results td.nuliga-score { white-space: nowrap; text-align: right; font-weight: 600; }
 `;
 
 function ensureStylesInjected() {
@@ -52,6 +58,44 @@ function formatScore(home: number | null, guest: number | null): string {
   return `${home}:${guest}`;
 }
 
+function formatShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+}
+
+function opponentOf(m: TeamOverview["results"][number], teamId: number): { opponent: string; atHome: boolean } {
+  const atHome = m.teamHomeId === teamId;
+  return { opponent: atHome ? m.teamGuest : m.teamHome, atHome };
+}
+
+function renderResultsList(team: TeamOverview): string {
+  if (team.results.length === 0) return "";
+
+  const rows = team.results
+    .map((m) => {
+      const { opponent, atHome } = opponentOf(m, team.teamId);
+      const score = m.isCompleted
+        ? atHome
+          ? formatScore(m.matchesHome, m.matchesGuest)
+          : formatScore(m.matchesGuest, m.matchesHome)
+        : "–";
+      return `
+        <tr>
+          <td class="nuliga-date">${formatShortDate(m.scheduled)}</td>
+          <td>${atHome ? "vs." : "bei"} ${opponent}</td>
+          <td class="nuliga-score">${score}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <details class="nuliga-results">
+      <summary>Alle Spiele (${team.results.length})</summary>
+      <table>${rows}</table>
+    </details>
+  `;
+}
+
 function renderTeamCard(team: TeamOverview): string {
   const rankLine = team.table
     ? `<div class="nuliga-row"><span class="nuliga-label">Tabelle</span><span class="nuliga-rank">Platz ${team.table.rank} (${team.table.ownPoints}:${team.table.otherPoints} Pkt.)</span></div>`
@@ -72,6 +116,7 @@ function renderTeamCard(team: TeamOverview): string {
       ${rankLine}
       ${nextLine}
       ${lastLine}
+      ${renderResultsList(team)}
     </div>
   `;
 }

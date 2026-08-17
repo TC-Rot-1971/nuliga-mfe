@@ -99,7 +99,9 @@ export class LiveNuligaClient implements NuligaClient {
   getMeetings(fromDate: string, toDate: string): Promise<NuligaMeetingsResponse> {
     return this.request<NuligaMeetingsResponse>(
       `/2014/federations/${this.config.federation}/clubs/${this.config.clubNr}/meetings`,
-      { fromDate, toDate, maxResults: 200 },
+      // 500 matches the reference client's full-season fetch (getspielplan.php);
+      // aggregate.ts now requests a full calendar year, not just ±30 days.
+      { fromDate, toDate, maxResults: 500 },
     );
   }
 }

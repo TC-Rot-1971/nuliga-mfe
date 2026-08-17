@@ -81,6 +81,8 @@ export interface TeamOverview {
   } | null;
   lastResult: NuligaMeeting | null;
   nextMatch: NuligaMeeting | null;
+  /** Full current-year match list (played + upcoming), chronological. */
+  results: NuligaMeeting[];
 }
 
 export interface ClubOverview {
