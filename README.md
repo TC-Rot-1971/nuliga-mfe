@@ -191,6 +191,30 @@ Published URLs (substitute your GitHub username/org and repo name):
 - Embed script: `https://YOUR-GH-USER.github.io/YOUR-REPO/nuliga-team-widget.js`
 - Data: `https://YOUR-GH-USER.github.io/YOUR-REPO/team-overview.json`
 
+## Contributing
+
+`main` is protected — no direct pushes, everything goes through a PR. The flow:
+
+1. **Open (or pick) a GitHub issue** describing the change.
+2. **Branch and implement**, then open a PR that references it (`Closes #N`).
+3. **CI must be green**: `.github/workflows/ci.yml` runs on every PR —
+   typecheck + build, and a check that the PR title is valid (see next point).
+   Both are required status checks; the PR can't merge until they pass.
+4. **PR title = squash commit message**, so it must follow
+   [Conventional Commits](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)
+   with the **issue number as scope**:
+   ```
+   <type>(#<issue>): <description>
+   ```
+   e.g. `feat(#2): add widget`. Allowed types: `build`, `chore`, `ci`, `docs`, `feat`,
+   `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
+5. **Merge via squash only** (the repo only allows squash merging; the squash commit
+   message defaults to the PR title, so step 4 is what actually lands in `main`'s
+   history).
+
+Merging to `main` auto-triggers `deploy-pages.yml`, so a merged PR goes live the same
+way a direct push used to.
+
 ## Forking this for another club
 
 Everything club-specific lives in GitHub repo Variables/Secrets, not in code — so
