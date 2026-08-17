@@ -19,9 +19,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 
   const config: Config = {
     mode,
-    federation: env.NULIGA_FEDERATION ?? "BAD",
-    clubNr: env.NULIGA_CLUB_NR ?? "33232",
-    clubName: env.NULIGA_CLUB_NAME ?? "TC Rot 1971",
+    // "||" on purpose, not "??": GitHub Actions turns an unset repo variable
+    // into an empty string rather than leaving it undefined.
+    federation: env.NULIGA_FEDERATION || "DEMO",
+    clubNr: env.NULIGA_CLUB_NR || "00000",
+    clubName: env.NULIGA_CLUB_NAME || "Musterverein",
     port: Number(env.PORT ?? 8787),
   };
 

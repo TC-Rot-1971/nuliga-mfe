@@ -13,7 +13,8 @@ export async function buildClubOverview(
   const teamsResponse = await client.getTeams();
 
   // Take the most recently listed season rather than string-matching a computed
-  // "current season" label — real season-name formatting from BAD is unverified.
+  // "current season" label — real season-name formatting from your association
+  // (nuPortalRS payload shape can vary slightly per federation) is unverified.
   const currentSeason = teamsResponse.teamSeason.at(-1);
   const rawTeams = (currentSeason?.teamChampionship ?? []).flatMap((champ) =>
     champ.team.map((team) => ({

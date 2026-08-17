@@ -49,9 +49,12 @@ jobs:
         run: npm run generate-overview -w server
         env:
           NULIGA_MODE: ${{ steps.mode.outputs.mode }}
-          NULIGA_FEDERATION: BAD
-          NULIGA_CLUB_NR: "33232"
-          NULIGA_CLUB_NAME: TC Rot 1971
+          # Set these three under Settings → Secrets and variables → Actions
+          # → Variables (not Secrets — they're not sensitive). See "Forking
+          # this for another club" in the README.
+          NULIGA_FEDERATION: ${{ vars.NULIGA_FEDERATION }}
+          NULIGA_CLUB_NR: ${{ vars.NULIGA_CLUB_NR }}
+          NULIGA_CLUB_NAME: ${{ vars.NULIGA_CLUB_NAME }}
           NULIGA_HOST: ${{ secrets.NULIGA_HOST }}
           NULIGA_CLIENT_ID: ${{ secrets.NULIGA_CLIENT_ID }}
           NULIGA_CLIENT_SECRET: ${{ secrets.NULIGA_CLIENT_SECRET }}

@@ -1,8 +1,12 @@
 # nuliga-mfe
 
-A small micro-frontend that shows TC Rot 1971's tennis teams (league, table rank, next
-match, last result) and can be embedded directly into the club's ClubDesk website as a
-web component — no iframe.
+A small micro-frontend that shows a tennis club's teams (league, table rank, next
+match, last result) and can be embedded directly into a ClubDesk website as a web
+component — no iframe.
+
+This repo is configured for one specific club via GitHub repo Variables/Secrets (see
+[Forking this for another club](#forking-this-for-another-club)) — nothing club-specific
+is hardcoded in the source.
 
 ## How the data works
 
@@ -13,11 +17,11 @@ match schedules/results — no HTML scraping involved. Player rosters / individu
 rankings (LK) are not exposed by this API (club-scope credentials only cover team-level
 competition data, presumably for GDPR reasons).
 
-**Access has to be requested from Badischer Tennisverband (BAD)** for club 33232
-(Tennisclub Rot 1971 e.V.). See [Requesting API access](#requesting-api-access) below.
-Until that's granted, the pipeline runs in **mock mode**, publishing realistic fixture
-data modeled on TC Rot 1971's actual public team list (Sommer 2026: Herren 30/40/60/70,
-Herren, Junioren U15, U18 gemischt).
+**Access has to be requested from your club's regional tennis association** (see
+[Requesting API access](#requesting-api-access) below). Until that's granted, the
+pipeline runs in **mock mode**, publishing placeholder fixture data (a fictional
+"Musterverein" with a handful of example teams) so everything — build, demo, ClubDesk
+embed — works end to end before real credentials exist.
 
 The nuPortalRS request/response shapes used here (`server/src/nuliga/types.ts`) were
 reverse-engineered from a working reference client
@@ -81,12 +85,35 @@ widget's demo page (`widget/index.html`) reads directly — so `widget/dist` aft
 build is fully self-contained, no backend needed to preview it. This is exactly what
 CI publishes to GitHub Pages.
 
+By default (no env vars / repo variables set), the club identity is a placeholder —
+federation `DEMO`, club number `00000`, name `Musterverein` — so the project runs
+out of the box without being configured for any real club yet.
+
+## Configuring your club's identity
+
+Three values identify your club to nuliga, used in both mock and live mode (mock mode
+uses them only for labeling — the fixture *data* is placeholder either way; live mode
+uses them to build the actual API request):
+
+- `NULIGA_FEDERATION` — the short code nuliga uses for your regional association
+  (e.g. `BAD` for Badischer Tennisverband, `WTB` for Württembergischer Tennis-Bund).
+  Check the `federation=` query param on your association's nuliga URLs.
+- `NULIGA_CLUB_NR` — your club's nuliga "Vereinsnummer", visible in the URL of your
+  club's team-list page (`.../clubTeams?club=12345` → `12345`). Findable via your
+  association's nuliga "Vereinssuche" (club search).
+- `NULIGA_CLUB_NAME` — display name only, used in the widget header.
+
+Locally: copy `server/.env.example` to `server/.env` and fill these in. In CI: set
+them as **repository variables** (Settings → Secrets and variables → Actions →
+Variables tab) — the workflow reads them from there, no code change needed.
+
 ## Enabling live nuliga data
 
-Once Badischer Tennisverband issues credentials, set them as **repository secrets**
-(Settings → Secrets and variables → Actions) — this is what the daily job uses:
+Once your association issues nuPortalRS credentials, set them as **repository
+secrets** (Settings → Secrets and variables → Actions → Secrets tab) — this is what
+the daily job uses:
 
-- `NULIGA_HOST` — exact host given by BAD, pattern seen elsewhere:
+- `NULIGA_HOST` — exact host given by your association, pattern seen elsewhere:
   `https://<verband>-portal.liga.nu`
 - `NULIGA_CLIENT_ID`
 - `NULIGA_CLIENT_SECRET`
@@ -95,37 +122,40 @@ The workflow (`.github/workflows/deploy-pages.yml`) checks whether `NULIGA_CLIEN
 is set and automatically switches from mock to live mode — no other change needed once
 the secrets exist.
 
-For local testing, copy `server/.env.example` to `server/.env` with the same values
-and `NULIGA_MODE=live`, then run `npm run generate-overview`.
+For local testing, add the same values plus `NULIGA_MODE=live` to `server/.env`, then
+run `npm run generate-overview`.
 
 `server/src/nuliga/nuligaClient.ts` (`LiveNuligaClient`) has never been run against a
 real token — validate the response shapes the moment credentials exist and adjust
-`types.ts`/`aggregate.ts` if BAD's actual payload differs from the reference client.
+`types.ts`/`aggregate.ts` if your association's actual payload differs from the
+reference client.
 
 ## Requesting API access
 
-Send this to Badischer Tennisverband (contact via badischer-tennisverband.de):
+Send something like this to your regional tennis association (contact details are
+usually on their nuliga portal or main website):
 
-> Betreff: nuPortalRS-Zugang für Tennisclub Rot 1971 e.V. (Vereinsnummer 33232)
+> Betreff: nuPortalRS-Zugang für \<Vereinsname\> (Vereinsnummer \<Vereinsnummer\>)
 >
 > Wir möchten für unsere Vereinswebsite eine Übersicht unserer Mannschaften
 > (Tabellenstand, nächste Spiele, letzte Ergebnisse) automatisiert aus nuLiga
 > anzeigen und bitten um Freischaltung des nuPortalRS-Zugangs (OAuth2, Scope
-> "club") für den Tennisclub Rot 1971 e.V., Vereinsnummer 33232. Bitte teilen
-> Sie uns den zuständigen nuPortalRS-Host sowie Client-ID/Client-Secret mit.
+> "club") für \<Vereinsname\>, Vereinsnummer \<Vereinsnummer\>. Bitte teilen Sie
+> uns den zuständigen nuPortalRS-Host sowie Client-ID/Client-Secret mit.
 
 ## Embedding in ClubDesk
 
-On the ClubDesk page that should show the teams:
+On the ClubDesk page that should show the teams (replace `YOUR-GH-USER`/`YOUR-REPO`
+with wherever you deployed this — see [Published URLs](#github-pages--ci) below):
 
 1. **Edit → Seiten-Optionen → HEAD-Start**, add:
    ```html
-   <script type="module" src="https://TC-Rot-1971.github.io/nuliga-mfe/nuliga-team-widget.js"></script>
+   <script type="module" src="https://YOUR-GH-USER.github.io/YOUR-REPO/nuliga-team-widget.js"></script>
    ```
 2. In the page body, add an **"Externe Inhalte"** block (or wherever ClubDesk lets you
    drop raw HTML) containing:
    ```html
-   <nuliga-team-widget api-base="https://TC-Rot-1971.github.io/nuliga-mfe/team-overview.json"></nuliga-team-widget>
+   <nuliga-team-widget api-base="https://YOUR-GH-USER.github.io/YOUR-REPO/team-overview.json"></nuliga-team-widget>
    ```
 
 That's it — both URLs are published by CI and refresh daily on their own; there's
@@ -154,9 +184,39 @@ configuration.
 manually via "Run workflow". Each run: picks live vs mock mode, fetches the overview,
 builds the widget, and deploys to Pages via `actions/deploy-pages` — no `gh-pages`
 branch, no long-lived secrets outside the job. One-time repo setup: **Settings → Pages
-→ Source: GitHub Actions** (already done for this repo).
+→ Source: GitHub Actions**.
 
-Published URLs:
-- Demo page: `https://TC-Rot-1971.github.io/nuliga-mfe/`
-- Embed script: `https://TC-Rot-1971.github.io/nuliga-mfe/nuliga-team-widget.js`
-- Data: `https://TC-Rot-1971.github.io/nuliga-mfe/team-overview.json`
+Published URLs (substitute your GitHub username/org and repo name):
+- Demo page: `https://YOUR-GH-USER.github.io/YOUR-REPO/`
+- Embed script: `https://YOUR-GH-USER.github.io/YOUR-REPO/nuliga-team-widget.js`
+- Data: `https://YOUR-GH-USER.github.io/YOUR-REPO/team-overview.json`
+
+## Forking this for another club
+
+Everything club-specific lives in GitHub repo Variables/Secrets, not in code — so
+reusing this for a different club is configuration, not editing.
+
+1. **Fork the repo** on GitHub.
+2. **Find your club's nuliga identity**: your association's nuliga federation code
+   and your club's Vereinsnummer — see
+   [Configuring your club's identity](#configuring-your-clubs-identity) above for how
+   to look these up.
+3. **Set repo variables**: Settings → Secrets and variables → Actions → Variables tab
+   → add `NULIGA_FEDERATION`, `NULIGA_CLUB_NR`, `NULIGA_CLUB_NAME`.
+4. **Enable GitHub Pages**: Settings → Pages → Source: **GitHub Actions**. (Or via CLI:
+   `gh api -X POST repos/<you>/<your-fork>/pages -f build_type=workflow`.)
+5. **Trigger the first deploy**: push any commit, or go to the Actions tab → "Fetch
+   nuliga data and deploy to GitHub Pages" → "Run workflow". It'll run in mock mode
+   (placeholder "Musterverein" data) until you have real credentials — which is fine,
+   it proves the whole pipeline works before you deal with your association.
+6. **Update the two URLs** in your ClubDesk embed (see
+   [Embedding in ClubDesk](#embedding-in-clubdesk)) to your fork's Pages URL.
+7. **When ready for real data**: request nuPortalRS access from your association (see
+   [Requesting API access](#requesting-api-access)), then add `NULIGA_HOST`,
+   `NULIGA_CLIENT_ID`, `NULIGA_CLIENT_SECRET` as repo secrets. The next scheduled or
+   manual run switches to live data automatically.
+
+The mock fixtures (`server/src/nuliga/fixtures/*.json`) are generic placeholder data
+(a "Musterverein" with a handful of made-up teams and opponents) — they're only there
+so mock mode has something realistic-shaped to render. Feel free to edit them for a
+nicer local demo, or just ignore them and wait for live data.
